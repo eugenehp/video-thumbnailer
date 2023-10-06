@@ -35,6 +35,14 @@ const image = await thumbnailer.getThumbnail(urlOrFile);
 
 ## Demo
 
+To run the demo:
+
+```shell
+cd example
+npm run dev
+# navigate to http://localhost:5173
+```
+
 ![Demo](./docs/demo.png)
 
 ## Development
