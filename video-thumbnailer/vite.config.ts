@@ -9,10 +9,12 @@ import pkg from "./package.json" assert { type: "json" };
 // https://vitejs.dev/guide/build.html#library-mode
 export default defineConfig({
   build: {
-    sourcemap: true,
+    sourcemap: false,
     lib: {
       entry: "./src/index.ts",
-      formats: ["es"], // pure ESM package
+      // formats: ["es", "umd"], // pure ESM package
+      name: "index",
+      fileName: "index", // otherwise it's called "video-thumbnailer"
     },
     rollupOptions: {
       external: [
