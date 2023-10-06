@@ -116,7 +116,7 @@ export class VideoThumbnailer {
     outputExtension: "jpg" | "png" = "png",
     extension = DEFAULT_EXTENSION,
     timeout = DEFAULT_TIMEOUT
-  ): Promise<string> => {
+  ): Promise<Blob> => {
     const output = `output.${outputExtension}`;
     const input = this.getInputName(fileOrURL, extension);
     await this.addFile(fileOrURL, input);
@@ -138,7 +138,8 @@ export class VideoThumbnailer {
     // ffmpeg -ss 00:00:01.00 -i input.mp4 -vf 'scale=320:320:force_original_aspect_ratio=decrease' -vframes 1 output.jpg
 
     const data = await this.ffmpeg.readFile(output);
-    let blob = URL.createObjectURL(new Blob([data], { type: "image/png" }));
+    // let blob = URL.createObjectURL(new Blob([data], { type: "image/png" }));
+    const blob = new Blob([data], { type: "image/png" });
 
     return blob;
   };
