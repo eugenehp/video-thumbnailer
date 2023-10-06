@@ -1,0 +1,42 @@
+{
+  "name": "video-thumbnailer",
+  "private": false,
+  "description": "Make video thumbnails in the browser",
+  "version": "0.0.1",
+  "type": "module",
+  "module": "./dist/video-thumbnailer.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/video-thumbnailer.js"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "prepare": "cp -f ../README.md ./README.md && cp -fR ../docs ./docs"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5",
+    "vite-plugin-dts": "^3.5.3"
+  },
+  "author": "Eugene Hauptmann",
+  "license": "MIT",
+  "keywords": [
+    "ffmpeg",
+    "video",
+    "thumbnail",
+    "browser",
+    "fast"
+  ],
+  "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.6",
+    "@ffmpeg/util": "^0.12.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eugenehp/video-thumbnailer.git"
+  }
+}
