@@ -25,12 +25,25 @@
 
   onMount(load);
 
-  const convert = async () => {
+  const convertURL = async () => {
     working = true;
     let start = now();
     const data = await thumbnailer.getThumbnail(videos[0]);
-    // console.log(data);
-    src = data;
+    const blob = URL.createObjectURL(new Blob([data], { type: "image/png" }));
+    src = blob;
+    diff_thumbnail = getDiff(start);
+    working = false;
+  };
+
+  const convertFile = async (e: Event) => {
+    //@ts-ignore
+    const file = e.target!.files[0];
+
+    working = true;
+    let start = now();
+    const data = await thumbnailer.getThumbnail(file);
+    const blob = URL.createObjectURL(new Blob([data], { type: "image/png" }));
+    src = blob;
     diff_thumbnail = getDiff(start);
     working = false;
   };
@@ -42,7 +55,15 @@
   {#if working}
     <p>FFMPEG is working...</p>
   {:else}
-    <button on:click={() => convert()}>Convert</button>
+    <div>
+      <button on:click={() => convertURL()}>Convert URL</button>
+      <input
+        type="file"
+        name="Convert File"
+        on:change={(e) => convertFile(e)}
+        accept=".mp4"
+      />
+    </div>
   {/if}
 {:else}
   <p>loading FFMPEG...</p>

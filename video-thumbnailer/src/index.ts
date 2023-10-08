@@ -5,6 +5,24 @@ const FFMPEG_CORE_VERSION = `0.12.3`;
 const DEFAULT_EXTENSION = "mp4";
 const DEFAULT_TIMEOUT = 30 * 10000; // timeout for ffmpeg.exec
 
+type Options = {
+  file: File | undefined;
+  url: string | undefined;
+  timestamp: string;
+  width: number;
+  outputExtension: "jpg" | "png";
+  extension: "mp4";
+  timeout: number;
+};
+
+const defaultOptions: Partial<Options> = {
+  timestamp: "00:00:01.000",
+  width: 360,
+  outputExtension: "png",
+  extension: DEFAULT_EXTENSION,
+  timeout: DEFAULT_TIMEOUT,
+};
+
 export class VideoThumbnailer {
   private ffmpeg: FFmpeg;
   //@ts-ignore
@@ -20,9 +38,9 @@ export class VideoThumbnailer {
   load = async () => {
     const baseURL = `https://unpkg.com/@ffmpeg/core@${FFMPEG_CORE_VERSION}/dist/esm`;
 
-    this.ffmpeg.on("progress", ({ progress, time }) => {
-      console.log(`${progress * 100} % (transcoded time: ${time / 1000000} s)`);
-    });
+    // this.ffmpeg.on("progress", ({ progress, time }) => {
+    //   console.log(`${progress * 100} % (transcoded time: ${time / 1000000} s)`);
+    // });
 
     await this.ffmpeg.load({
       coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
@@ -43,20 +61,17 @@ export class VideoThumbnailer {
   /** Adds a file that can be later pulled by FFMPEG as an input */
   addFile = async (fileOrURL: File | string, input: string) => {
     let file = await fetchFile(fileOrURL);
-    // console.log("getThumbnail -> fetchFile");
+    // console.log("getThumbnail -> fetchFile", file);
+    try {
+      await this.ffmpeg.deleteFile(input);
+    } catch (err) {}
     await this.ffmpeg.writeFile(input, file);
     // console.log("getThumbnail -> writeFile");
   };
 
   /** rename given input name to `input.ext` where `ext` taken from the input */
-  private getInputName = (
-    fileOrURL: File | string,
-    extension = DEFAULT_EXTENSION
-  ) => {
-    const ext =
-      (typeof fileOrURL == "string"
-        ? fileOrURL.split(".").pop()
-        : fileOrURL.name.split(".").pop()) || extension;
+  private getInputName = (fileName: string, extension = DEFAULT_EXTENSION) => {
+    const ext = fileName.split(".").pop() || extension;
     return `input.${ext}`;
   };
 
@@ -72,7 +87,7 @@ export class VideoThumbnailer {
     await this.ffmpeg.exec(["-i", input]);
     this.ffmpeg.off("log", onLog);
 
-    // console.log("getMetadata", logs);
+    console.log("getMetadata", logs);
 
     let duration_str = "";
     logs.map((line) => {
@@ -107,26 +122,31 @@ export class VideoThumbnailer {
   };
 
   /** get thumbnail for an earlier provided input.
-   *
+   * @param options @type Options
    * @returns a `Blob` of an image (PNG or JPG, PNG is default)
    */
   getThumbnail = async (
-    fileOrURL: File | string,
-    timestamp: string = "00:00:01.000",
-    outputExtension: "jpg" | "png" = "png",
-    extension = DEFAULT_EXTENSION,
-    timeout = DEFAULT_TIMEOUT
+    options: Partial<Options> = defaultOptions
   ): Promise<Blob> => {
+    const opts = { ...defaultOptions, ...options } as Options;
+    const { outputExtension, file, url, extension, timeout, timestamp, width } =
+      opts;
     const output = `output.${outputExtension}`;
-    const input = this.getInputName(fileOrURL, extension);
-    await this.addFile(fileOrURL, input);
+    const input = this.getInputName(file ? file.name : url!, extension);
+    await this.addFile(file || url!, input);
     // const metadata = await this.getMetadata(input);
     // console.log({ metadata });
 
     const ok =
       0 ==
       (await this.ffmpeg.exec(
-        [["-i", input], ["-ss", timestamp], ["-vframes", "1"], output].flat(),
+        [
+          ["-i", input],
+          ["-ss", timestamp],
+          ["-vframes", "1"],
+          ["-vf", `scale=${width}:-1`],
+          output,
+        ].flat(),
         timeout
       ));
 
