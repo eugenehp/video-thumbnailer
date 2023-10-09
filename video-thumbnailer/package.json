@@ -2,7 +2,7 @@
   "name": "video-thumbnailer",
   "private": false,
   "description": "Make video thumbnails in the browser",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "module",
   "main": "./dist/index.umd.cjs",
   "module": "./dist/index.js",
