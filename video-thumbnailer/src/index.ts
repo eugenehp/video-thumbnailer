@@ -24,6 +24,12 @@ const defaultOptions: Partial<Options> = {
   timeout: DEFAULT_TIMEOUT,
 };
 
+type Metadata = {
+  duration: number;
+  width: number;
+  height: number;
+};
+
 export class VideoThumbnailer {
   private ffmpeg: FFmpeg;
   //@ts-ignore
@@ -135,14 +141,14 @@ export class VideoThumbnailer {
    */
   getThumbnail = async (
     options: Partial<Options> = defaultOptions
-  ): Promise<Blob> => {
+  ): Promise<{ blob: Blob; metadata: Metadata }> => {
     const opts = { ...defaultOptions, ...options } as Options;
     const { outputExtension, file, url, extension, timeout, timestamp, width } =
       opts;
     const output = `output.${outputExtension}`;
     const input = this.getInputName(file ? file.name : url!, extension);
     await this.addFile(file || url!, input);
-    // const metadata = await this.getMetadata(input);
+    const metadata = await this.getMetadata(input);
     // console.log({ metadata });
 
     const ok =
@@ -169,6 +175,6 @@ export class VideoThumbnailer {
     // let blob = URL.createObjectURL(new Blob([data], { type: "image/png" }));
     const blob = new Blob([data], { type: "image/png" });
 
-    return blob;
+    return { blob, metadata };
   };
 }

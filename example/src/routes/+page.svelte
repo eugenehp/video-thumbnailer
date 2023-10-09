@@ -29,7 +29,9 @@
     working = true;
     let start = now();
     const data = await thumbnailer.getThumbnail({ url: videos[0] });
-    const blob = URL.createObjectURL(new Blob([data], { type: "image/png" }));
+    const blob = URL.createObjectURL(
+      new Blob([data.blob], { type: "image/png" })
+    );
     src = blob;
     diff_thumbnail = getDiff(start);
     working = false;
@@ -42,7 +44,9 @@
     working = true;
     let start = now();
     const data = await thumbnailer.getThumbnail({ file });
-    const blob = URL.createObjectURL(new Blob([data], { type: "image/png" }));
+    const blob = URL.createObjectURL(
+      new Blob([data.blob], { type: "image/png" })
+    );
     src = blob;
     diff_thumbnail = getDiff(start);
     working = false;
