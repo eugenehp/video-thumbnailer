@@ -1,5 +1,6 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
+import { parseTimestamp } from "./utils";
 
 const FFMPEG_CORE_VERSION = `0.12.3`;
 const DEFAULT_EXTENSION = "mp4";
@@ -78,6 +79,8 @@ export class VideoThumbnailer {
   /** get duration of the video input */
   getMetadata = async (input: string) => {
     let logs: string[] = [];
+    let streams: any[] = [];
+    let durations: number[] = [];
 
     const onLog = ({ message }: any) => {
       logs.push(message);
@@ -87,37 +90,42 @@ export class VideoThumbnailer {
     await this.ffmpeg.exec(["-i", input]);
     this.ffmpeg.off("log", onLog);
 
-    console.log("getMetadata", logs);
+    // console.log("getMetadata", logs);
 
-    let duration_str = "";
     logs.map((line) => {
       // Duration: 00:00:05.50, start: 0.000000, bitrate: 7895 kb/s
       // HH:mm::ss.ms
       if (line.includes(" Duration: ")) {
         let array = line.trim().split(" ");
-        duration_str = array[1].slice(0, -1);
+        durations.push(parseTimestamp(array[1].slice(0, -1)));
+      }
+
+      if (line.trim().startsWith("Stream #")) {
+        streams.push(line.trim());
       }
     });
 
-    let duration = duration_str.includes(".")
-      ? parseInt(duration_str.split(".")[1])
-      : 0;
+    // from  "Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 24559 kb/s, 30 fps, 3…"
+    // to { width: 1920, height: 1080 }
+    const dimensions = streams.map((s) => {
+      const [w, h] = s
+        .split(": ")
+        .slice(-1)[0]
+        .split(", ")[2]
+        .split(" ")[0]
+        .split("x");
+      const width = parseInt(w);
+      const height = parseInt(h);
+      return { width, height };
+    });
 
-    let [HH, mm, ss]: number[] = duration_str
-      .split(".")[0]
-      .split(":")
-      .map((s) => parseInt(s));
-
-    const seconds = 1000; // in milliseconds
-    const minutes = 60 * seconds; // in milliseconds
-    const hours = 60 * minutes; // in milliseconds
-
-    duration += ss * seconds; // seconds
-    duration += mm * minutes; // minutes
-    duration += HH * hours; // hours
+    // console.log("getMetadata", streams);
+    const { width, height } = dimensions[0];
 
     return {
-      duration, // in milliseconds
+      duration: durations[0], // in milliseconds
+      width,
+      height,
     };
   };
 

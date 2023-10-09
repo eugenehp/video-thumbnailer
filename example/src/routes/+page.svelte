@@ -28,7 +28,7 @@
   const convertURL = async () => {
     working = true;
     let start = now();
-    const data = await thumbnailer.getThumbnail(videos[0]);
+    const data = await thumbnailer.getThumbnail({ url: videos[0] });
     const blob = URL.createObjectURL(new Blob([data], { type: "image/png" }));
     src = blob;
     diff_thumbnail = getDiff(start);
@@ -41,7 +41,7 @@
 
     working = true;
     let start = now();
-    const data = await thumbnailer.getThumbnail(file);
+    const data = await thumbnailer.getThumbnail({ file });
     const blob = URL.createObjectURL(new Blob([data], { type: "image/png" }));
     src = blob;
     diff_thumbnail = getDiff(start);
