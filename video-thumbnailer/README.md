@@ -30,7 +30,7 @@ const urlOrFile =
   "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
 
 // contains a Blob that can be directly set to img.src
-const image = await thumbnailer.getThumbnail(urlOrFile);
+const { blob, metadata } = await thumbnailer.getThumbnail(urlOrFile);
 ```
 
 ## Demo
