@@ -43,7 +43,8 @@ npm run dev
 # navigate to http://localhost:5173
 ```
 
-![Demo](./docs/demo.png)
+Demo (GIF) 👇
+![Demo](./docs/demo.gif)
 
 ## Development
 
